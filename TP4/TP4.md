@@ -67,12 +67,16 @@ Se serializó el paquete en JSON con la morfología requerida y se envió median
 {"group": "Xi JinPING Revenge", "payload": "Hola mundo"}
 ```
 
-![Im1](https://hackmd.io/_uploads/rJsOxkMbGe.png)
+
+![Im1](Im1.png)
+
 
 
 El servidor recibió el paquete, lo deserializó correctamente y mostró por consola el grupo y la carga útil. Como PacketSender envía el texto sin cifrar, el servidor lo imprime tal cual lo recibe.
 
-![servidor](https://hackmd.io/_uploads/ryRDZ1zZfg.png)
+
+![servidor](servidor.png)
+
 
 
 ---
@@ -102,7 +106,8 @@ client.sendall(json.dumps(mensaje).encode("utf-8"))
 
 Se ejecutaron el servidor y el cliente en paralelo sobre 127.0.0.1:5000. El servidor recibió y procesó correctamente cada mensaje enviado desde el cliente, validando el funcionamiento de la comunicación.
 
-![cliente](https://hackmd.io/_uploads/ByTObkGbMx.png)
+![cliente](cliente.png)
+
 
 ---
 
@@ -127,7 +132,9 @@ mensaje = {"group": GROUP, "payload": payload_cifrada}
 
 El servidor recibe la payload como una cadena ilegible codificada en Base64 URL-safe, que comienza con gAAAAA. El campo group sigue llegando en texto claro. Esto confirma que la información sensible viaja cifrada por la red.
 
-![servidorcifrado](https://hackmd.io/_uploads/BkTbGJMbfe.png)
+
+![servidorcifrado](servidorcifrado.png)
+
 
 
 #### c) Características de la técnica de cifrado
@@ -159,7 +166,7 @@ Para auditar el tráfico se capturaron los paquetes con tcpdump sobre la interfa
 sudo tcpdump -i lo -A 'tcp port 5000'
 ```
 
-![cifrado](https://hackmd.io/_uploads/r1Ya-1f-Gl.png)
+![cifrado](cifrado.png)
 
 
 La captura evidencia el funcionamiento de extremo a extremo: la payload viaja cifrada por la red, de modo que un atacante que interceptara el tráfico solo vería el texto cifrado, mientras que el servidor, al poseer la clave compartida, es el único capaz de recuperar el contenido original.
