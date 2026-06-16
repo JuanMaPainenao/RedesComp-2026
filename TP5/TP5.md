@@ -57,7 +57,7 @@ Simulador utilizado: Server Survival (https://github.com/pshenok/server-survival
 
 ### Incrementen el rate: que sucede después de la queue?
 
-![queuecargando](img/queuecargando.png)
+![queuecargando](img/queucargando.png)
 
 La queue entrega siempre el mismo rate de salida, sin importar el rate de entrada. Cuando el rate de entrada es mayor que el de salida, los paquetes se almacenan en la queue. Cuando llega al limite de 200 la queue empieza a descartar nuevos paquetes.
 
