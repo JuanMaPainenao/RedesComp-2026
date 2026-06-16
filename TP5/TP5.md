@@ -187,7 +187,7 @@ La unidad de escalado es el nodo completo, es decir, el conjunto formado por la 
 
 ### Resultado final:
 
-![p6-3](https://hackmd.io/_uploads/SJ8u9C0WMg.png)
+![queueliberando](img/p6-3.png)
 
 Perdimos por bancarrota debido a que escalamos mas de lo necesario (Agregando 4 nodos) lo cual supuso un coste por segundo mas elevado que el ingreso actual. Lo ideal hubiera sido esperar a que el sistema con los 4 nodos se sature, e ir agregando de a uno o dos nodos.
  
