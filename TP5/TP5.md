@@ -57,13 +57,13 @@ Simulador utilizado: Server Survival (https://github.com/pshenok/server-survival
 
 ### Incrementen el rate: que sucede después de la queue?
 
-![queucargando](https://hackmd.io/_uploads/Sy9kgmhZGe.png)
+![queuecargando](img/queuecargando.png)
 
 La queue entrega siempre el mismo rate de salida, sin importar el rate de entrada. Cuando el rate de entrada es mayor que el de salida, los paquetes se almacenan en la queue. Cuando llega al limite de 200 la queue empieza a descartar nuevos paquetes.
 
 ### Mantengan el rate alto y luego llevenlo a cero rápidamente. Qué sucede después de la queue?
 
-![queueliberando](https://hackmd.io/_uploads/SJcyeQ3Zzg.png)
+![queueliberando](img/queueliberando.png)
 
 La queue continua entregando paquetes que habia almacenado.
 
@@ -76,7 +76,7 @@ La cola desacopla el ritmo de llegada (productor) del ritmo de procesamiento (co
 
 ### a) La arquitectura inicial.
 
-![estmin](https://hackmd.io/_uploads/rJTTbXnZMx.png)
+![queueliberando](img/estmin.png)
 
 La arquitectura minima propuesta fue: firewall, load balancer, compute, SQL DB, storage y CDN. Esta arquitectura, constituye una base mínima sólida porque cubre con un solo componente cada uno de los tipos de tráfico exigidos, evitando puntos sin atender. El firewall se ubica en el ingreso y bloquea el tráfico malicioso antes de que consuma recursos o afecte la reputación, resolviendo la dimensión de seguridad. El CDN, respaldado por el storage, sirve el contenido estático con alta tasa de acierto sin recurrir al cómputo, mientras que el storage actúa tambien como destino de los uploads. El tráfico dinámico ingresa a través del load balancer hacia el compute, que procesa las solicitudes y las deriva a la SQL DB. Se elecciono SQL DB ya que es la unica que resuelve a la vez lecturas, escrituras y busquedas, a diferencia de NoSQL, que si bien es mas rapida, no resuelve busquedas. 
 
@@ -90,7 +90,7 @@ El estado de salud de los servicios fue bueno durante el transcurso del juego.
 
 ### d) El momento en que la arquitectura empieza a fallar, si ocurre.
 
-![estminfallo](https://hackmd.io/_uploads/r1aTW72ZMg.png)
+![queueliberando](img/estminfallo.png)
 
 ### ¿Qué componente falló primero? 
 El primer componente que fallo fue el computo ya que su capacidad es muy baja (4) y su tiempo de procesamiento alto (600 ms).
@@ -109,8 +109,7 @@ A partir de la infraestructura mínima se probaron tres configuraciones sucesiva
 - Configuración: 2 instancias de Compute, 1 SQL DB y 1 Storage.
 - Resultado: a 21 req/s ambas instancias de cómputo se saturaron.
 
-![p5](https://hackmd.io/_uploads/rypsZrhbzg.png)
-
+![queueliberando](img/p5.png)
 
 - Análisis: el cuello de botella fue la capacidad de cómputo. Duplicar las instancias elevó el techo de procesamiento, pero cada Compute tiene capacidad baja (4), de modo que la capacidad combinada siguió siendo insuficiente: al llegar a 21 req/s la demanda superó lo que ambos nodos podían procesar y las solicitudes comenzaron a fallar.
 
@@ -119,7 +118,7 @@ A partir de la infraestructura mínima se probaron tres configuraciones sucesiva
 - Configuración: 4 instancias de Compute más una Cache delante de la SQL DB.
 - Resultado: la reputación cayó a 0 % por acumulación de errores (game over).
 
-![p5-1](https://hackmd.io/_uploads/rk3nbBhZGg.png)
+![queueliberando](img/p5-1.png)
 
 - Análisis: al sumar cómputo, el cuello de botella se desplazó hacia la base de datos única. La caché alivia las lecturas, pero no actúa sobre las escrituras (los WRITE no son cacheables), por lo que cuatro instancias de cómputo alimentando una sola SQL DB la saturaron igualmente. Los fallos acumulados llevaron la reputación a cero. Esta corrida evidencia que escalar un nivel sin atender al siguiente solo traslada el límite a otro componente.
 
@@ -127,7 +126,7 @@ A partir de la infraestructura mínima se probaron tres configuraciones sucesiva
 ### Estrategia 3:
 - Configuración: se mantuvieron las 4 instancias de Compute, asignando a cada una su propia Cache y su propia SQL DB, y se agregaron dos NoSQL, de modo que dos instancias de cómputo se conectan a una NoSQL y las otras dos a la otra.
 
-![p5-2](https://hackmd.io/_uploads/rJH6bSnbGe.png)
+![queueliberando](img/p5-2.png)
 
 - Análisis: en lugar de concentrar todo el tráfico de datos en una sola base, la carga se reparte entre varios almacenes, de modo que ningún componente único actúa como cuello de botella. Cada cómputo dispone de caché local para sus lecturas y de una base dedicada para sus operaciones, y el reparto en dos NoSQL divide aún más la carga de read/write. Al atacar el verdadero cuello —la capa de datos— y no solo el cómputo, esta configuración es la que mejor sostiene el tráfico de las tres.
 
@@ -144,9 +143,7 @@ La conclusión es que el escalado horizontal mejora el sistema solo cuando se ap
 
 La arquitectura se construyó replicando una unidad o nodo. Cada nodo se compone de: internet -> firewall -> queue -> load balancer -> 4 instancias de Compute. De los cuatro cómputos, dos acceden a una Cache y de ahí a una SQL DB, y los otros dos a una segunda Cache y SQL DB; los cuatro comparten además una NoSQL. Cada par de cómputos se conecta a un Storage, y cada Storage a un CDN expuesto a internet. Una Serverless Function toma trabajo desde la queue hacia las dos SQL DB. La arquitectura final está formada por 8 de estos nodos.
  
-
-![p6](https://hackmd.io/_uploads/HyGU9RRZMg.png)
-
+![queueliberando](img/p6.png)
 ### Por qué elegiste cada componente.
 
 - Firewall: como primera línea de ingreso, bloquea el tráfico malicioso antes de que consuma recursos, protegiendo la reputación (cada ataque filtrado resta reputación de forma severa).
@@ -186,7 +183,7 @@ La unidad de escalado es el nodo completo, es decir, el conjunto formado por la 
 
 ### Arquitectura final:
 
-![p6-2](https://hackmd.io/_uploads/SJfw5R0-zl.png)
+![queueliberando](img/p6-2.png)
 
 ### Resultado final:
 
